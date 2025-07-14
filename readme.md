@@ -71,7 +71,7 @@ You’ll need:
 
 Clone this repo:
 
-```bash
+bash
 git clone https://github.com/garvkhurana/assessment
 cd assesment
 
