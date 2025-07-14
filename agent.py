@@ -1,30 +1,66 @@
 from phi.assistant import Assistant
-from phi.model.groq import Groq
-
+from phi.llm.groq import Groq  
 from phi.tools.python import PythonTools
 
 def generate_persona(user_data, groq_api_key):
-    llm = Groq(api_key=groq_api_key, model="mixtral-8x7b-32768")
+    try:
+        llm = Groq(api_key=groq_api_key, model="llama3-70b-8192")
 
-    content = ""
-    for post in user_data["posts"]:
-        content += f"POST: {post['title']}\n{post['body']}\nURL: {post['url']}\n\n"
-    for comment in user_data["comments"]:
-        content += f"COMMENT: {comment['body']}\nLink: {comment['link']}\n\n"
+        if not user_data["posts"] and not user_data["comments"]:
+            return "No posts or comments found for this user. Unable to generate persona.", []
 
-    prompt = f"""
-You are an expert persona analyst.
-For each trait (e.g., Interests, Tone, Writing Style, Behavior):
-- Name the trait.
-- Give a short description.
-- Cite the post/comment URL used for inference.
+        content = ""
+        
+        
+        if user_data["posts"]:
+            content += "=== POSTS ===\n"
+            for i, post in enumerate(user_data["posts"][:20], 1): 
+                content += f"POST {i}:\n"
+                content += f"Title: {post['title']}\n"
+                if post['body']:
+                    content += f"Body: {post['body']}\n"
+                content += f"Subreddit: {post.get('subreddit', 'N/A')}\n"
+                content += f"Score: {post.get('score', 'N/A')}\n"
+                content += f"URL: {post['url']}\n\n"
 
-Reddit User Activity:
+        
+        if user_data["comments"]:
+            content += "=== COMMENTS ===\n"
+            for i, comment in enumerate(user_data["comments"][:30], 1):  
+                content += f"COMMENT {i}:\n"
+                content += f"Body: {comment['body']}\n"
+                content += f"Subreddit: {comment.get('subreddit', 'N/A')}\n"
+                content += f"Score: {comment.get('score', 'N/A')}\n"
+                content += f"Link: {comment['link']}\n\n"
+
+        prompt = f"""
+You are an expert persona analyst. Analyze the following Reddit user activity and create a comprehensive persona.
+
+For each trait category, provide:
+- **Trait Name**: Clear category name
+- **Description**: Detailed analysis (2-3 sentences)
+- **Evidence**: Specific examples from posts/comments with references
+
+Categories to analyze:
+1. **Core Interests & Hobbies**
+2. **Communication Style & Tone**
+3. **Values & Beliefs**
+4. **Behavioral Patterns**
+5. **Expertise Areas**
+6. **Social Interaction Style**
+7. **Personality Traits**
+
+Reddit User: {user_data['username']}
+
+Reddit Activity Data:
 {content}
 
-Now build the user persona.
+Please provide a structured analysis with clear evidence backing each conclusion.
 """
 
-    agent = Assistant(llm=llm, tools=[PythonTools()])
-    response = agent.run(prompt)
-    return response, []
+        agent = Assistant(llm=llm, tools=[PythonTools()])
+        response = agent.run(prompt)
+        return response, []
+    
+    except Exception as e:
+        return f"Error generating persona: {str(e)}", []
