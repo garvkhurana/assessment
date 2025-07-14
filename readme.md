@@ -73,6 +73,9 @@ Clone this repo:
 
 bash
 git clone https://github.com/garvkhurana/assessment
+
+then
+
 cd assesment
 
 Install dependencies:
