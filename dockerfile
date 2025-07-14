@@ -16,3 +16,8 @@ EXPOSE 8501
 ENV STREAMLIT_BROWSER_GATHER_USAGE_STATS=False
 
 CMD ["streamlit", "run", "app.py"]
+
+
+
+
+
