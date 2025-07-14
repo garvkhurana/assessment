@@ -68,10 +68,9 @@ You’ll need:
 ---
 
 ## 🧰 3. Installation
-
+```bash
 Clone this repo:
 
-```bash
 git clone https://github.com/garvkhurana/assessment
 cd assesment
 
